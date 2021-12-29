@@ -51,6 +51,7 @@ class VCXParser(Parser):
             'ProjectConfiguration': self.do_nothing_node_stub,
             'ConfigurationType': self.__parse_configuration_type,
             'WholeProgramOptimization': self.__parse_whole_program_optimization,
+            'UseOfMfc': context.flags.set_mfc,
             'CharacterSet': context.flags.set_character_set,
             'PlatformToolset': self.do_nothing_node_stub,
             'PropertyGroup': self.__parse_property_group,
