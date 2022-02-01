@@ -414,7 +414,7 @@ def normalize_path(context, working_path, path_to_normalize, remove_relative=Tru
         os.path.join(working_path, ntpath.normpath(path_to_normalize.strip()))
     )
     normal_path = os.path.normpath(joined_path)
-    if '$(IntDir)' not in normal_path:
+    if '$' not in normal_path:
         actual_path_name = get_actual_filename(context, normal_path)
         if actual_path_name is None:
             message(
