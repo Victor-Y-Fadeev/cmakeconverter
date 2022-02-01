@@ -106,6 +106,7 @@ class CPPFlags(Flags):
             ('GenerateManifest', self.__set_generate_manifest),
             ('FixedBaseAddress', self.__set_fixed_base_address),
             ('StackReserveSize', self.__set_stack_reserve_size),
+            ('EntryPointSymbol', self.__set_entry_point_symbol),
             ('GenerateDebugInformation', self.__set_generate_debug_information),
             ('TargetMachine', self.__set_target_machine),
             ('ImageHasSafeExceptionHandlers', self.__set_image_has_safe_exception_handlers),
@@ -1195,6 +1196,29 @@ class CPPFlags(Flags):
                 {
                     stack_value: {
                         ln_flags: '/STACK:{}'.format(stack_value)
+                    }
+                }
+            )
+
+        return flag_values
+
+    @staticmethod
+    def __set_entry_point_symbol(context, flag_name, node):
+        """
+        Set EntryPointSymbol flag: /ENTRY
+
+        """
+        del context, flag_name
+        flag_values = {
+            default_value: {}
+        }
+
+        entry_value = node.text
+        if entry_value:
+            flag_values.update(
+                {
+                    entry_value: {
+                        ln_flags: '/ENTRY:{}'.format(entry_value)
                     }
                 }
             )
