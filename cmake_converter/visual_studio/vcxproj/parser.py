@@ -75,6 +75,7 @@ class VCXParser(Parser):
             'Import': self._parse_nodes,
             'ClInclude': self._parse_nodes,
             'ClCompile': self._parse_nodes,
+            'ResourceCompile': self._parse_nodes,
             'None': self._parse_nodes,
             'Text': self._parse_nodes,
             'Xml': self._parse_nodes,
