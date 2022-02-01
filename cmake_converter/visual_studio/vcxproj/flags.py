@@ -106,13 +106,13 @@ class CPPFlags(Flags):
             ('GenerateManifest', self.__set_generate_manifest),
             ('FixedBaseAddress', self.__set_fixed_base_address),
             ('StackReserveSize', self.__set_stack_reserve_size),
-            ('EntryPointSymbol', self.__set_entry_point_symbol),
             ('GenerateDebugInformation', self.__set_generate_debug_information),
             ('TargetMachine', self.__set_target_machine),
             ('ImageHasSafeExceptionHandlers', self.__set_image_has_safe_exception_handlers),
             ('IgnoreSpecificDefaultLibraries',
              self.__set_target_ignore_specific_default_libraries),
             ('SubSystem', self.__set_sub_system),
+            ('EntryPointSymbol', self.__set_entry_point_symbol),
             ('OptimizeReferences', self.__set_optimize_references),
             ('LinkTimeCodeGeneration', self.__set_link_time_code_generation),
             ('EnableCOMDATFolding', self.__set_enable_comdat_folding),
@@ -331,6 +331,7 @@ class CPPFlags(Flags):
         for setting in context.settings:
             self.__apply_generate_debug_information(context, setting)
             self.__apply_link_incremental(context, setting)
+            self.__apply_entry_point(context, setting)
             for flag_name in self.flags_handlers:
                 for context_flags_data_key in context_flags_data_keys:
                     if setting in self.flags:
@@ -367,6 +368,19 @@ class CPPFlags(Flags):
         conf_type = context.settings[setting]['target_type']
         if conf_type and 'StaticLibrary' in conf_type:
             self.flags[setting]['LinkIncremental'][ln_flags] = ''
+
+    def __apply_entry_point(self, context, setting):
+        if self.flags[setting]['SubSystem'] and not self.flags[setting]['EntryPointSymbol']:
+            if setting in self.unicode_defines and 'UNICODE' in self.unicode_defines[setting]:
+                if '/SUBSYSTEM:CONSOLE' in self.flags[setting]['SubSystem'][ln_flags]:
+                    self.flags[setting]['EntryPointSymbol'][ln_flags] = ['/ENTRY:wmainCRTStartup']
+                elif '/SUBSYSTEM:WINDOWS' in self.flags[setting]['SubSystem'][ln_flags]:
+                    self.flags[setting]['EntryPointSymbol'][ln_flags] = ['/ENTRY:wWinMainCRTStartup']
+            else:
+                if '/SUBSYSTEM:CONSOLE' in self.flags[setting]['SubSystem'][ln_flags]:
+                    self.flags[setting]['EntryPointSymbol'][ln_flags] = ['/ENTRY:mainCRTStartup']
+                elif '/SUBSYSTEM:WINDOWS' in self.flags[setting]['SubSystem'][ln_flags]:
+                    self.flags[setting]['EntryPointSymbol'][ln_flags] = ['/ENTRY:WinMainCRTStartup']
 
     @staticmethod
     def __set_compile_whole_program_optimization(context, flag_name, node):
