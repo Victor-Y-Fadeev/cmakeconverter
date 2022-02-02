@@ -370,7 +370,10 @@ class CPPFlags(Flags):
             self.flags[setting]['LinkIncremental'][ln_flags] = ''
 
     def __apply_entry_point(self, context, setting):
-        if self.flags[setting]['SubSystem'] and not self.flags[setting]['EntryPointSymbol']:
+        conf_type = context.settings[setting]['target_type']
+        if (conf_type and 'Application' in conf_type and
+                self.flags[setting]['SubSystem'] and not self.flags[setting]['EntryPointSymbol']):
+
             if setting in self.unicode_defines and 'UNICODE' in self.unicode_defines[setting]:
                 if '/SUBSYSTEM:CONSOLE' in self.flags[setting]['SubSystem'][ln_flags]:
                     self.flags[setting]['EntryPointSymbol'][ln_flags] = ['/ENTRY:wmainCRTStartup']
