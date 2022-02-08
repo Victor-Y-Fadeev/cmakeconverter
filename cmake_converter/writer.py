@@ -208,11 +208,11 @@ class CMakeWriter:
                 file_path_name = os.path.normpath(os.path.join(file_path, file_name))
                 file_path_name = set_unix_slash(file_path_name)
                 cmake_file.write('{}"{}"\n'.format(context.indent, file_path_name))
-        cmake_file.write(')\n')
+        cmake_file.write(')\n\n')
 
         CMakeWriter.write_property_of_settings(
                 context, cmake_file,
-                begin_text='\nadd_custom_command_if(\n'
+                begin_text='add_custom_command_if(\n'
                            '{0}OUTPUT ${{MIDL_OUTPUT}}\n'
                            '{0}COMMANDS'.format(context.indent),
                 end_text='{0}DEPENDS ${{MIDL_FILE}}\n'
