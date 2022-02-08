@@ -28,7 +28,7 @@ import re
 import os
 from collections import OrderedDict
 
-from cmake_converter.flags import Flags, defines, cl_flags, default_value, ln_flags
+from cmake_converter.flags import Flags, defines, cl_flags, default_value, ln_flags, midl_flags
 from cmake_converter.utils import take_name_from_list_case_ignore
 from cmake_converter.utils import set_unix_slash, message, replace_vs_vars_with_cmake_vars
 
@@ -123,6 +123,15 @@ class CPPFlags(Flags):
             ('IgnoreEmbeddedIDL', self.__set_ignore_embedded_idl),
             ('AssemblyDebug', self.__set_assembly_debug),
             ('LinkAdditionalOptions', self.__set_link_additional_options),
+            # precompilation midl_flags
+            ('MkTypLibCompatible', self.__set_mk_typ_lib_compatible),
+            ('ValidateAllParameters', self.__set_validate_all_parameters),
+            ('TargetEnvironment', self.__set_target_environment),
+            ('GenerateStublessProxies', self.__set_generate_stubless_proxies),
+            # ('TypeLibraryName', self.__set_type_library_name),
+            # ('HeaderFileName', self.__set_header_file_name),
+            # ('InterfaceIdentifierFileName', self.__set_interface_identifier_file_name),
+
         ])
 
     def __set_default_flag(self, context, flag_name):
@@ -326,6 +335,7 @@ class CPPFlags(Flags):
         context_flags_data_keys = [
             cl_flags,
             ln_flags,
+            midl_flags,
             'PrecompiledHeader',
         ]
 
@@ -1441,6 +1451,66 @@ class CPPFlags(Flags):
         flag_values = {
             'false': {cl_flags: '/Zc:wchar_t-'},
             'true': {cl_flags: '/Zc:wchar_t'},
+            default_value: {}
+        }
+
+        return flag_values
+
+    @staticmethod
+    def __set_mk_typ_lib_compatible(context, flag_name, node):
+        """
+        Set MkTypLibCompatible /mktyplib203
+
+        """
+        del context, flag_name, node
+        flag_values = {
+            'true': {midl_flags: '/mktyplib203'},
+            default_value: {}
+        }
+
+        return flag_values
+
+    @staticmethod
+    def __set_validate_all_parameters(context, flag_name, node):
+        """
+        Set ValidateAllParameters /robust
+
+        """
+        del context, flag_name, node
+        flag_values = {
+            'true': {midl_flags: '/robust'},
+            'false': {midl_flags: '/no_robust'},
+            default_value: {}
+        }
+
+        return flag_values
+
+    @staticmethod
+    def __set_target_environment(context, flag_name, node):
+        """
+        Set TargetEnvironment /env
+
+        """
+        del context, flag_name, node
+        flag_values = {
+            'Win32': {midl_flags: '/env win32'},
+            'Itanium': {midl_flags: '/env ia64'},
+            'ARM64': {midl_flags: '/env amd64'},
+            'X64': {midl_flags: '/env x64'},
+            default_value: {}
+        }
+
+        return flag_values
+
+    @staticmethod
+    def __set_generate_stubless_proxies(context, flag_name, node):
+        """
+        Set GenerateStublessProxies /Oicf
+
+        """
+        del context, flag_name, node
+        flag_values = {
+            'true': {midl_flags: '/Oicf'},
             default_value: {}
         }
 

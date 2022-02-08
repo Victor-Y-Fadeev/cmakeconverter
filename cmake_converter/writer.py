@@ -30,7 +30,7 @@ from collections import OrderedDict
 
 from cmake_converter.utils import message, make_cmake_literal,\
     normalize_path, is_settings_has_data, set_unix_slash
-from cmake_converter.flags import defines, cl_flags, ln_flags, ifort_cl_win, ifort_cl_unix,\
+from cmake_converter.flags import defines, cl_flags, ln_flags, midl_flags, ifort_cl_win, ifort_cl_unix,\
     ifort_ln_win, ifort_ln_unix
 from cmake_converter.data_files import get_cmake_lists
 
