@@ -199,15 +199,6 @@ class CMakeWriter:
                             context.settings[setting_to_merge][midl_flags]
                         )
 
-        # for sln_setting in context.sln_configurations_map:
-        #     print(sln_setting)
-        #     if midl_flags in context.settings[sln_setting]:
-        #         print('    midl_flags: ' + ' '.join(context.settings[sln_setting][midl_flags]))
-        #     if cl_flags in context.settings[sln_setting]:
-        #         print('    cl_flags: ' + ' '.join(context.settings[sln_setting][cl_flags]))
-        #     if ln_flags in context.settings[sln_setting]:
-        #         print('    ln_flags: ' + ' '.join(context.settings[sln_setting][ln_flags]))
-
         CMakeWriter.write_property_of_settings(
                 context, cmake_file,
                 begin_text='add_custom_command_if(\n'
@@ -218,6 +209,11 @@ class CMakeWriter:
                 property_name=midl_flags,
                 write_setting_property_func=CMakeWriter.write_midl_commands
             )
+
+        cmake_file.write('add_custom_target(${{PROJECT_NAME}}_MIDL\n'
+                         '{}DEPENDS ${{MIDL_OUTPUT}}\n'
+                         ')\n\n'.format(context.indent))
+        context.sln_deps.append('${PROJECT_NAME}_MIDL')
 
     @staticmethod
     def write_target_artifact(context, cmake_file):
