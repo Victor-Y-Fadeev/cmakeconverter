@@ -28,9 +28,11 @@ import re
 import os
 from collections import OrderedDict
 
-from cmake_converter.flags import Flags, defines, cl_flags, default_value, ln_flags, midl_flags
+from cmake_converter.flags import Flags, defines, cl_flags, default_value, ln_flags, midl_flags,\
+    midl_output
 from cmake_converter.utils import take_name_from_list_case_ignore
-from cmake_converter.utils import set_unix_slash, message, replace_vs_vars_with_cmake_vars
+from cmake_converter.utils import set_unix_slash, message, replace_vs_vars_with_cmake_vars,\
+    get_basename_without_vs_vars
 
 
 # pylint: disable=R0903
@@ -128,9 +130,9 @@ class CPPFlags(Flags):
             ('ValidateAllParameters', self.__set_validate_all_parameters),
             ('TargetEnvironment', self.__set_target_environment),
             ('GenerateStublessProxies', self.__set_generate_stubless_proxies),
-            # ('TypeLibraryName', self.__set_type_library_name),
-            # ('HeaderFileName', self.__set_header_file_name),
-            # ('InterfaceIdentifierFileName', self.__set_interface_identifier_file_name),
+            ('TypeLibraryName', self.__set_type_library_name),
+            ('HeaderFileName', self.__set_header_file_name),
+            ('InterfaceIdentifierFileName', self.__set_interface_identifier_file_name),
 
         ])
 
@@ -336,6 +338,7 @@ class CPPFlags(Flags):
             cl_flags,
             ln_flags,
             midl_flags,
+            midl_output,
             'PrecompiledHeader',
         ]
 
@@ -1459,7 +1462,7 @@ class CPPFlags(Flags):
     @staticmethod
     def __set_mk_typ_lib_compatible(context, flag_name, node):
         """
-        Set MkTypLibCompatible /mktyplib203
+        Set MkTypLibCompatible flag: /mktyplib203
 
         """
         del context, flag_name, node
@@ -1473,7 +1476,7 @@ class CPPFlags(Flags):
     @staticmethod
     def __set_validate_all_parameters(context, flag_name, node):
         """
-        Set ValidateAllParameters /robust
+        Set ValidateAllParameters flag: /robust
 
         """
         del context, flag_name, node
@@ -1488,7 +1491,7 @@ class CPPFlags(Flags):
     @staticmethod
     def __set_target_environment(context, flag_name, node):
         """
-        Set TargetEnvironment /env
+        Set TargetEnvironment flag: /env
 
         """
         del context, flag_name, node
@@ -1505,7 +1508,7 @@ class CPPFlags(Flags):
     @staticmethod
     def __set_generate_stubless_proxies(context, flag_name, node):
         """
-        Set GenerateStublessProxies /Oicf
+        Set GenerateStublessProxies flag: /Oicf
 
         """
         del context, flag_name, node
@@ -1513,5 +1516,80 @@ class CPPFlags(Flags):
             'true': {midl_flags: '/Oicf'},
             default_value: {}
         }
+
+        return flag_values
+
+    @staticmethod
+    def __set_type_library_name(context, flag_name, node):
+        """
+        Set TypeLibraryName flag: /tlb
+
+        """
+        del flag_name
+        flag_values = {
+            default_value: {}
+        }
+
+        entry_value = node.text
+        if entry_value:
+            value = get_basename_without_vs_vars(context, entry_value)
+            flag_values.update(
+                {
+                    entry_value: {
+                        midl_flags: '/tlb {}'.format(value),
+                        midl_output: value
+                    }
+                }
+            )
+
+        return flag_values
+
+    @staticmethod
+    def __set_header_file_name(context, flag_name, node):
+        """
+        Set HeaderFileName flag: /h
+
+        """
+        del flag_name
+        flag_values = {
+            default_value: {}
+        }
+
+        entry_value = node.text
+        if entry_value:
+            value = get_basename_without_vs_vars(context, entry_value)
+            flag_values.update(
+                {
+                    entry_value: {
+                        midl_flags: '/h {}'.format(value),
+                        midl_output: value
+                    }
+                }
+            )
+
+        return flag_values
+
+    @staticmethod
+    def __set_interface_identifier_file_name(context, flag_name, node):
+        """
+        Set InterfaceIdentifierFileName flag: /iid
+
+        """
+        del flag_name
+        flag_values = {
+            default_value: {}
+        }
+
+        entry_value = node.text
+        if entry_value:
+            value = get_basename_without_vs_vars(context, entry_value)
+            flag_values.update(
+                {
+                    entry_value: {
+                        midl_flags: '/iid {}'.format(value),
+                        midl_output: value
+                    }
+                }
+            )
 
         return flag_values

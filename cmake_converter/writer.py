@@ -30,8 +30,8 @@ from collections import OrderedDict
 
 from cmake_converter.utils import message, make_cmake_literal,\
     normalize_path, is_settings_has_data, set_unix_slash
-from cmake_converter.flags import defines, cl_flags, ln_flags, midl_flags, ifort_cl_win,\
-    ifort_cl_unix, ifort_ln_win, ifort_ln_unix
+from cmake_converter.flags import defines, cl_flags, ln_flags, midl_flags, midl_output,\
+    ifort_cl_win, ifort_cl_unix, ifort_ln_win, ifort_ln_unix
 from cmake_converter.data_files import get_cmake_lists
 
 # pylint: disable=R0904
@@ -175,7 +175,16 @@ class CMakeWriter:
         """ Writes MIDL Compiler stage into CMakwLists.txt """
         CMakeWriter.write_comment(cmake_file, 'MIDL Compiler')
 
-        cmake_file.write('set(MIDL_FILE\n')
+        CMakeWriter.write_property_of_settings(
+            context, cmake_file,
+            begin_text='set(MIDL_OUTPUT',
+            end_text=')',
+            property_name=midl_output,
+            separator='\n',
+            in_quotes=True
+        )
+
+        cmake_file.write('\nset(MIDL_FILE\n')
         for file_path in context.midl:
             for file_name in context.midl[file_path]:
                 file_path_name = os.path.normpath(os.path.join(file_path, file_name))
@@ -189,12 +198,12 @@ class CMakeWriter:
                            '{0}OUTPUT ${{MIDL_OUTPUT}}\n'
                            '{0}COMMANDS'.format(context.indent),
                 end_text='{0}DEPENDS ${{MIDL_FILE}}\n'
-                         '{0}COMMENT "MIDL Compiler"\n)\n'.format(context.indent),
+                         '{0}COMMENT "MIDL Compiler"\n)'.format(context.indent),
                 property_name=midl_flags,
                 write_setting_property_func=CMakeWriter.write_midl_commands
             )
 
-        cmake_file.write('add_custom_target(${{PROJECT_NAME}}_MIDL\n'
+        cmake_file.write('\nadd_custom_target(${{PROJECT_NAME}}_MIDL\n'
                          '{}DEPENDS ${{MIDL_OUTPUT}}\n'
                          ')\n\n'.format(context.indent))
         context.sln_deps.append('${PROJECT_NAME}_MIDL')
@@ -716,7 +725,7 @@ class CMakeWriter:
         """ Write MIDL compiler calls (helper) """
         if config_condition_expr is None:
             return
-        cmake_file.write('{0}{1}COMMAND {2:>{width}} midl {3}\n'
+        cmake_file.write('{0}{1}COMMAND {2:>{width}} midl {3} ${{MIDL_FILE}}\n'
                             .format(property_indent, kwargs['main_indent'], config_condition_expr,
                                     ' '.join(property_value),
                                     width=width))
