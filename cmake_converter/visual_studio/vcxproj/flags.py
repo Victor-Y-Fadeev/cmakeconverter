@@ -372,8 +372,9 @@ class CPPFlags(Flags):
 
     def __apply_entry_point(self, context, setting):
         conf_type = context.settings[setting]['target_type']
-        if (conf_type and 'Application' in conf_type and
-                self.flags[setting]['SubSystem'] and not self.flags[setting]['EntryPointSymbol']):
+        if conf_type and 'Application' in conf_type \
+                and self.flags[setting]['SubSystem'] \
+                and not self.flags[setting]['EntryPointSymbol']:
 
             if setting in self.unicode_defines and 'UNICODE' in self.unicode_defines[setting]:
                 if '/SUBSYSTEM:CONSOLE' in self.flags[setting]['SubSystem'][ln_flags]:
