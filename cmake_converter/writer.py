@@ -171,10 +171,28 @@ class CMakeWriter:
             )
         cmake_file.write(')\n\n')
 
-    def write_midl_compiler(self, context, cmake_file):
-        """ Writes MIDL Compiler stage into CMakwLists.txt """
-        CMakeWriter.write_comment(cmake_file, 'MIDL Compiler')
+    @staticmethod
+    def write_midl_compiler(context, cmake_file):
+        """
+        Write MIDL Compiler stage
 
+        :param context: converter Context
+        :type context: Context
+        :param cmake_file: CMakeLIsts.txt IO wrapper
+        :type cmake_file: _io.TextIOWrapper
+        """
+
+        if not [setting for setting in context.settings
+                            if midl_output in context.settings[setting] \
+                                and context.settings[setting][midl_output]]:
+            message(
+                context,
+                'The MIDL compiler stage exists, but the output is not set!',
+                'warn'
+            )
+            return
+
+        CMakeWriter.write_comment(cmake_file, 'MIDL Compiler')
         CMakeWriter.write_property_of_settings(
             context, cmake_file,
             begin_text='set(MIDL_OUTPUT',
@@ -190,11 +208,11 @@ class CMakeWriter:
                 file_path_name = os.path.normpath(os.path.join(file_path, file_name))
                 file_path_name = set_unix_slash(file_path_name)
                 cmake_file.write('{}"{}"\n'.format(context.indent, file_path_name))
-        cmake_file.write(')\n\n')
+        cmake_file.write(')\n')
 
         CMakeWriter.write_property_of_settings(
                 context, cmake_file,
-                begin_text='add_custom_command_if(\n'
+                begin_text='\nadd_custom_command_if(\n'
                            '{0}OUTPUT ${{MIDL_OUTPUT}}\n'
                            '{0}COMMANDS'.format(context.indent),
                 end_text='{0}DEPENDS ${{MIDL_FILE}}\n'
@@ -204,9 +222,11 @@ class CMakeWriter:
             )
 
         cmake_file.write('\nadd_custom_target(${{PROJECT_NAME}}_MIDL\n'
-                         '{}DEPENDS ${{MIDL_OUTPUT}}\n'
-                         ')\n\n'.format(context.indent))
+                         '{}DEPENDS ${{MIDL_OUTPUT}}\n)\n'.format(context.indent))
         context.sln_deps.append('${PROJECT_NAME}_MIDL')
+
+        cmake_file.write('\nset_source_files_properties(${{MIDL_OUTPUT}} PROPERTIES\n'
+                         '{}GENERATED "TRUE"\n)\n\n'.format(context.indent))
 
     @staticmethod
     def write_target_artifact(context, cmake_file):

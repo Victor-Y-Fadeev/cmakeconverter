@@ -116,7 +116,7 @@ class DataConverter:
     def __merge_midl_flags(context):
         midl_settings = [setting for setting in context.sln_configurations_map
                                     if setting in context.settings \
-                                            and midl_flags in context.settings[setting]]
+                                        and midl_flags in context.settings[setting]]
 
         settings_to_merge = [setting for setting in midl_settings
                                         if setting[0] is None \
