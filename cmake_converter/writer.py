@@ -30,8 +30,8 @@ from collections import OrderedDict
 
 from cmake_converter.utils import message, make_cmake_literal,\
     normalize_path, is_settings_has_data, set_unix_slash
-from cmake_converter.flags import defines, cl_flags, ln_flags, midl_flags, ifort_cl_win, ifort_cl_unix,\
-    ifort_ln_win, ifort_ln_unix
+from cmake_converter.flags import defines, cl_flags, ln_flags, midl_flags, ifort_cl_win,\
+    ifort_cl_unix, ifort_ln_win, ifort_ln_unix
 from cmake_converter.data_files import get_cmake_lists
 
 # pylint: disable=R0904
@@ -182,22 +182,6 @@ class CMakeWriter:
                 file_path_name = set_unix_slash(file_path_name)
                 cmake_file.write('{}"{}"\n'.format(context.indent, file_path_name))
         cmake_file.write(')\n\n')
-
-        midl_settings = [setting for setting in context.sln_configurations_map
-                                    if setting in context.settings \
-                                            and midl_flags in context.settings[setting]]
-
-        settings_to_merge = [setting for setting in midl_settings
-                                        if setting[0] is None \
-                                            and context.settings[setting][midl_flags]]
-
-        for setting in midl_settings:
-            if setting[0] is not None:
-                for setting_to_merge in settings_to_merge:
-                    if setting_to_merge[1] == setting[1]:
-                        context.settings[setting][midl_flags].extend(
-                            context.settings[setting_to_merge][midl_flags]
-                        )
 
         CMakeWriter.write_property_of_settings(
                 context, cmake_file,
