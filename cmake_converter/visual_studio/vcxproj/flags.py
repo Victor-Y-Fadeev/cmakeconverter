@@ -372,20 +372,21 @@ class CPPFlags(Flags):
 
     def __apply_entry_point(self, context, setting):
         conf_type = context.settings[setting]['target_type']
+        sub_system_flag = self.flags[setting]['SubSystem']
+        entry_point_symbol_flag = self.flags[setting]['EntryPointSymbol']
         if conf_type and 'Application' in conf_type \
-                and self.flags[setting]['SubSystem'] \
-                and not self.flags[setting]['EntryPointSymbol']:
+                and sub_system_flag and not entry_point_symbol_flag:
 
             if setting in self.unicode_defines and 'UNICODE' in self.unicode_defines[setting]:
-                if '/SUBSYSTEM:CONSOLE' in self.flags[setting]['SubSystem'][ln_flags]:
-                    self.flags[setting]['EntryPointSymbol'][ln_flags] = ['/ENTRY:wmainCRTStartup']
-                elif '/SUBSYSTEM:WINDOWS' in self.flags[setting]['SubSystem'][ln_flags]:
-                    self.flags[setting]['EntryPointSymbol'][ln_flags] = ['/ENTRY:wWinMainCRTStartup']
+                if '/SUBSYSTEM:CONSOLE' in sub_system_flag[ln_flags]:
+                    entry_point_symbol_flag[ln_flags] = ['/ENTRY:wmainCRTStartup']
+                elif '/SUBSYSTEM:WINDOWS' in sub_system_flag[ln_flags]:
+                    entry_point_symbol_flag[ln_flags] = ['/ENTRY:wWinMainCRTStartup']
             else:
-                if '/SUBSYSTEM:CONSOLE' in self.flags[setting]['SubSystem'][ln_flags]:
-                    self.flags[setting]['EntryPointSymbol'][ln_flags] = ['/ENTRY:mainCRTStartup']
-                elif '/SUBSYSTEM:WINDOWS' in self.flags[setting]['SubSystem'][ln_flags]:
-                    self.flags[setting]['EntryPointSymbol'][ln_flags] = ['/ENTRY:WinMainCRTStartup']
+                if '/SUBSYSTEM:CONSOLE' in sub_system_flag[ln_flags]:
+                    entry_point_symbol_flag[ln_flags] = ['/ENTRY:mainCRTStartup']
+                elif '/SUBSYSTEM:WINDOWS' in sub_system_flag[ln_flags]:
+                    entry_point_symbol_flag[ln_flags] = ['/ENTRY:WinMainCRTStartup']
 
     @staticmethod
     def __set_compile_whole_program_optimization(context, flag_name, node):
