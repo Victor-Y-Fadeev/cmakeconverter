@@ -53,6 +53,9 @@ class CMakeWriter:
         self.write_source_groups(context, cmake_file)
 
         if context.sources:
+            if context.midl:
+                self.write_midl_compiler(context, cmake_file)
+
             self.write_comment(cmake_file, 'Target')
             self.write_target_artifact(context, cmake_file)
             self.write_use_pch_function(context, cmake_file)
@@ -166,6 +169,18 @@ class CMakeWriter:
                     self.get_source_group_var(context, source_group)
                 )
             )
+        cmake_file.write(')\n\n')
+
+    def write_midl_compiler(self, context, cmake_file):
+        """ Writes MIDL Compiler stage into CMakwLists.txt """
+        CMakeWriter.write_comment(cmake_file, 'MIDL Compiler')
+
+        cmake_file.write('set(MIDL_FILE\n')
+        for file_path in context.midl:
+            for file_name in context.midl[file_path]:
+                file_path_name = os.path.normpath(os.path.join(file_path, file_name))
+                file_path_name = set_unix_slash(file_path_name)
+                cmake_file.write('{}"{}"\n'.format(context.indent, file_path_name))
         cmake_file.write(')\n\n')
 
     @staticmethod
