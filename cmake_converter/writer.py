@@ -183,6 +183,42 @@ class CMakeWriter:
                 cmake_file.write('{}"{}"\n'.format(context.indent, file_path_name))
         cmake_file.write(')\n\n')
 
+        midl_settings = [setting for setting in context.sln_configurations_map
+                                    if setting in context.settings \
+                                            and midl_flags in context.settings[setting]]
+
+        settings_to_merge = [setting for setting in midl_settings
+                                        if setting[0] is None \
+                                            and context.settings[setting][midl_flags]]
+
+        for setting in midl_settings:
+            if setting[0] is not None:
+                for setting_to_merge in settings_to_merge:
+                    if setting_to_merge[1] == setting[1]:
+                        context.settings[setting][midl_flags].extend(
+                            context.settings[setting_to_merge][midl_flags]
+                        )
+
+        # for sln_setting in context.sln_configurations_map:
+        #     print(sln_setting)
+        #     if midl_flags in context.settings[sln_setting]:
+        #         print('    midl_flags: ' + ' '.join(context.settings[sln_setting][midl_flags]))
+        #     if cl_flags in context.settings[sln_setting]:
+        #         print('    cl_flags: ' + ' '.join(context.settings[sln_setting][cl_flags]))
+        #     if ln_flags in context.settings[sln_setting]:
+        #         print('    ln_flags: ' + ' '.join(context.settings[sln_setting][ln_flags]))
+
+        CMakeWriter.write_property_of_settings(
+                context, cmake_file,
+                begin_text='add_custom_command_if(\n'
+                           '{0}OUTPUT ${{MIDL_OUTPUT}}\n'
+                           '{0}COMMANDS'.format(context.indent),
+                end_text='{0}DEPENDS ${{MIDL_FILE}}\n'
+                         '{0}COMMENT "MIDL Compiler"\n)\n'.format(context.indent),
+                property_name=midl_flags,
+                write_setting_property_func=CMakeWriter.write_midl_commands
+            )
+
     @staticmethod
     def write_target_artifact(context, cmake_file):
         """
@@ -693,6 +729,17 @@ class CMakeWriter:
                              .format(property_indent, kwargs['main_indent'], config_condition_expr,
                                      build_event_command,
                                      width=width))
+
+    @staticmethod
+    def write_midl_commands(cmake_file, property_indent, config_condition_expr,
+                                     property_value, width, **kwargs):
+        """ Write MIDL compiler calls (helper) """
+        if config_condition_expr is None:
+            return
+        cmake_file.write('{0}{1}COMMAND {2:>{width}} midl {3}\n'
+                            .format(property_indent, kwargs['main_indent'], config_condition_expr,
+                                    ' '.join(property_value),
+                                    width=width))
 
     def write_target_build_events(self, context, cmake_file):
         """ Writes all target build events into CMakeLists.txt """
