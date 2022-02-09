@@ -28,8 +28,8 @@
 import os
 from collections import OrderedDict
 
-from cmake_converter.utils import message, make_cmake_literal,\
-    normalize_path, is_settings_has_data, set_unix_slash
+from cmake_converter.utils import message, make_cmake_literal, normalize_path,\
+    is_settings_has_data, is_settings_arch_equal, set_unix_slash
 from cmake_converter.flags import defines, cl_flags, ln_flags, midl_flags, midl_output,\
     ifort_cl_win, ifort_cl_unix, ifort_ln_win, ifort_ln_unix
 from cmake_converter.data_files import get_cmake_lists
@@ -1431,7 +1431,8 @@ class CMakeWriter:
                 settings_of_arch[arch] = OrderedDict()
             settings_of_arch[arch][sln_setting] = sln_setting
 
-        single_arch = len(settings_of_arch) == 1
+        single_arch = len(settings_of_arch) == 1 or is_settings_arch_equal(
+            sln_setting_2_project_setting,settings, property_name)
         command_indent = ''
         first_arch = True
         for arch in settings_of_arch:
@@ -1470,6 +1471,9 @@ class CMakeWriter:
                                                  config_expressions,
                                                  has_property_value,
                                                  **kwargs)
+            if single_arch:
+                break
+
         if not first_arch and not single_arch:
             cmake_file.write('{}endif()\n'.format(indent))
 

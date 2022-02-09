@@ -151,6 +151,44 @@ def is_settings_has_data(sln_configurations_map, settings, settings_key, sln_arc
                 return True
     return False
 
+def is_settings_arch_equal(sln_configurations_map, settings, settings_key, conf=''):
+    """ Checker of available settings equality for different architectures """
+    set_of_conf = set()
+    first_arch = True
+    prev_key = None
+
+    for sln_setting in sln_configurations_map:
+        mapped_setting_key = sln_configurations_map[sln_setting]
+        if mapped_setting_key not in settings:
+            continue
+        mapped_setting = settings[mapped_setting_key]
+
+        if conf == '':
+            set_of_conf.add(mapped_setting_key[0])
+            continue
+        elif mapped_setting_key[0] != conf:
+            continue
+
+        if settings_key in mapped_setting:
+            if mapped_setting[settings_key]:
+                if first_arch:
+                    first_arch = False
+                    prev_key = mapped_setting[settings_key]
+                elif prev_key != mapped_setting[settings_key]:
+                    return False
+            elif prev_key != None:
+                    return False
+        elif prev_key != None:
+                return False
+
+    return True if conf != '' else all(map(lambda current_conf:
+        is_settings_arch_equal(
+            sln_configurations_map,
+            settings,
+            settings_key,
+            current_conf
+        ), set_of_conf))
+
 
 def get_mapped_architectures(sln_setting_2_project_setting, arch):
     """ Get all projects architectures that mapped onto given solution one """
