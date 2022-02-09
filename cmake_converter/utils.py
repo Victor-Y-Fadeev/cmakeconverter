@@ -151,43 +151,40 @@ def is_settings_has_data(sln_configurations_map, settings, settings_key, sln_arc
                 return True
     return False
 
-def is_settings_arch_equal(sln_configurations_map, settings, settings_key, conf=''):
+def is_settings_arch_equal(sln_configurations_map, settings, settings_key):
     """ Checker of available settings equality for different architectures """
-    set_of_conf = set()
-    first_arch = True
-    prev_key = None
+    mapped_settings_keys = [sln_configurations_map[sln_setting]
+        for sln_setting in sln_configurations_map
+            if sln_configurations_map[sln_setting] in settings \
+                and sln_configurations_map[sln_setting][1] is not None]
 
-    for sln_setting in sln_configurations_map:
-        mapped_setting_key = sln_configurations_map[sln_setting]
-        if mapped_setting_key not in settings:
-            continue
-        mapped_setting = settings[mapped_setting_key]
+    set_of_conf = set(map(lambda mapped_setting_key: mapped_setting_key[0], mapped_settings_keys))
+    set_of_arch = set(map(lambda mapped_setting_key: mapped_setting_key[1], mapped_settings_keys))
 
-        if conf == '':
-            set_of_conf.add(mapped_setting_key[0])
-            continue
-        elif mapped_setting_key[0] != conf:
-            continue
-
-        if settings_key in mapped_setting:
-            if mapped_setting[settings_key]:
-                if first_arch:
-                    first_arch = False
-                    prev_key = mapped_setting[settings_key]
-                elif prev_key != mapped_setting[settings_key]:
-                    return False
-            elif prev_key != None:
-                    return False
-        elif prev_key != None:
+    for conf in set_of_conf:
+        first_arch = True
+        prev_key = None
+        for arch in set_of_arch:
+            if (conf, arch) not in settings:
                 return False
 
-    return True if conf != '' else all(map(lambda current_conf:
-        is_settings_arch_equal(
-            sln_configurations_map,
-            settings,
-            settings_key,
-            current_conf
-        ), set_of_conf))
+            mapped_setting = settings[(conf, arch)]
+            if first_arch:
+                first_arch = False
+                if settings_key in mapped_setting and mapped_setting[settings_key]:
+                    prev_key = mapped_setting[settings_key]
+                continue
+
+            if settings_key in mapped_setting:
+                if mapped_setting[settings_key]:
+                    if prev_key != mapped_setting[settings_key]:
+                        return False
+                elif prev_key != None:
+                        return False
+            elif prev_key != None:
+                    return False
+
+    return True
 
 
 def get_mapped_architectures(sln_setting_2_project_setting, arch):
