@@ -182,9 +182,8 @@ class CMakeWriter:
         :type cmake_file: _io.TextIOWrapper
         """
 
-        if not [setting for setting in context.settings
-                            if midl_output in context.settings[setting] \
-                                and context.settings[setting][midl_output]]:
+        if not [setting for setting in context.settings if midl_output in context.settings[setting]
+                and context.settings[setting][midl_output]]:
             message(
                 context,
                 'The MIDL compiler stage exists, but the output is not set!',
@@ -211,15 +210,15 @@ class CMakeWriter:
         cmake_file.write(')\n\n')
 
         CMakeWriter.write_property_of_settings(
-                context, cmake_file,
-                begin_text='add_custom_command_if(\n'
-                           '{0}OUTPUT ${{MIDL_OUTPUT}}\n'
-                           '{0}COMMANDS'.format(context.indent),
-                end_text='{0}DEPENDS ${{MIDL_FILE}}\n'
-                         '{0}COMMENT "MIDL Compiler"\n)'.format(context.indent),
-                property_name=midl_flags,
-                write_setting_property_func=CMakeWriter.write_midl_commands
-            )
+            context, cmake_file,
+            begin_text='add_custom_command_if(\n'
+                       '{0}OUTPUT ${{MIDL_OUTPUT}}\n'
+                       '{0}COMMANDS'.format(context.indent),
+            end_text='{0}DEPENDS ${{MIDL_FILE}}\n'
+                     '{0}COMMENT "MIDL Compiler"\n)'.format(context.indent),
+            property_name=midl_flags,
+            write_setting_property_func=CMakeWriter.write_midl_commands
+        )
 
         cmake_file.write('\nadd_custom_target(${{PROJECT_NAME}}_MIDL\n'
                          '{}DEPENDS ${{MIDL_OUTPUT}}\n)\n'.format(context.indent))
@@ -741,14 +740,14 @@ class CMakeWriter:
 
     @staticmethod
     def write_midl_commands(cmake_file, property_indent, config_condition_expr,
-                                     property_value, width, **kwargs):
+                            property_value, width, **kwargs):
         """ Write MIDL compiler calls (helper) """
         if config_condition_expr is None:
             return
         cmake_file.write('{0}{1}COMMAND {2:>{width}} midl {3} ${{MIDL_FILE}}\n'
-                            .format(property_indent, kwargs['main_indent'], config_condition_expr,
-                                    ' '.join(property_value),
-                                    width=width))
+                         .format(property_indent, kwargs['main_indent'], config_condition_expr,
+                                 ' '.join(property_value),
+                                 width=width))
 
     def write_target_build_events(self, context, cmake_file):
         """ Writes all target build events into CMakeLists.txt """
@@ -1432,7 +1431,7 @@ class CMakeWriter:
             settings_of_arch[arch][sln_setting] = sln_setting
 
         single_arch = len(settings_of_arch) == 1 or is_settings_arch_equal(
-            sln_setting_2_project_setting,settings, property_name)
+            sln_setting_2_project_setting, settings, property_name)
         command_indent = ''
         first_arch = True
         for arch in settings_of_arch:

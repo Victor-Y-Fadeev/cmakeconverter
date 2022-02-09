@@ -151,12 +151,14 @@ def is_settings_has_data(sln_configurations_map, settings, settings_key, sln_arc
                 return True
     return False
 
+
 def is_settings_arch_equal(sln_configurations_map, settings, settings_key):
     """ Checker of available settings equality for different architectures """
-    mapped_settings_keys = [sln_configurations_map[sln_setting]
-        for sln_setting in sln_configurations_map
-            if sln_configurations_map[sln_setting] in settings \
-                and sln_configurations_map[sln_setting][1] is not None]
+    mapped_settings_keys = [
+        sln_configurations_map[sln_setting] for sln_setting in sln_configurations_map
+        if sln_configurations_map[sln_setting] in settings
+        and sln_configurations_map[sln_setting][1] is not None
+    ]
 
     set_of_conf = set(map(lambda mapped_setting_key: mapped_setting_key[0], mapped_settings_keys))
     set_of_arch = set(map(lambda mapped_setting_key: mapped_setting_key[1], mapped_settings_keys))
@@ -179,10 +181,10 @@ def is_settings_arch_equal(sln_configurations_map, settings, settings_key):
                 if mapped_setting[settings_key]:
                     if prev_key != mapped_setting[settings_key]:
                         return False
-                elif prev_key != None:
-                        return False
-            elif prev_key != None:
+                elif prev_key is not None:
                     return False
+            elif prev_key is not None:
+                return False
 
     return True
 
@@ -380,15 +382,21 @@ def get_basename_without_vs_vars(context, path_with_vars):
     path_with_vars = path_with_vars.replace('${ROOT_NAMESPACE}', context.root_namespace)
 
     if context.settings[context.current_setting]['OUTPUT_DIRECTORY']:
-        path_with_vars = path_with_vars.replace('${OUTPUT_DIRECTORY}',
-            context.settings[context.current_setting]['OUTPUT_DIRECTORY'][0])
+        path_with_vars = path_with_vars.replace(
+            '${OUTPUT_DIRECTORY}',
+            context.settings[context.current_setting]['OUTPUT_DIRECTORY'][0]
+        )
 
     if context.settings[context.current_setting]['TARGET_NAME']:
-        path_with_vars = path_with_vars.replace('${TARGET_NAME}',
-            context.settings[context.current_setting]['TARGET_NAME'][0])
+        path_with_vars = path_with_vars.replace(
+            '${TARGET_NAME}',
+            context.settings[context.current_setting]['TARGET_NAME'][0]
+        )
 
-    path_with_vars = path_with_vars.replace('${PROJECT_NAME}',
-        make_cmake_literal(context, context.project_name))
+    path_with_vars = path_with_vars.replace(
+        '${PROJECT_NAME}',
+        make_cmake_literal(context, context.project_name)
+    )
 
     return os.path.basename(path_with_vars)
 
