@@ -615,6 +615,24 @@ class CMakeWriter:
         cmake_file.write('\n')
 
     @staticmethod
+    def __is_property_of_settings_equal(fst_context, snd_context, property_name):
+        if set(fst_context.settings) != set(snd_context.settings):
+            return False
+
+        for setting in fst_context.settings:
+            fst_setting = fst_context.settings[setting]
+            snd_setting = snd_context.settings[setting]
+
+            if property_name not in fst_setting:
+                if property_name in snd_setting:
+                    return False
+            elif property_name not in snd_setting:
+                return False
+            elif set(fst_setting[property_name]) != set(snd_setting[property_name]):
+                return False
+        return True
+
+    @staticmethod
     def __write_compile_flags(context, cmake_file, compiler_flags_key):
         CMakeWriter.write_property_of_settings(
             context, cmake_file,
@@ -624,17 +642,27 @@ class CMakeWriter:
             separator=';\n',
             indent=context.indent
         )
+
+        prev_file = None
         for file in context.file_contexts:
-            file_cl_var = 'FILE_CL_OPTIONS'
-            text = CMakeWriter.write_property_of_settings(
-                context.file_contexts[file], cmake_file,
-                begin_text='string(CONCAT {}'.format(file_cl_var),
-                end_text=')',
-                property_name=compiler_flags_key,
-                indent=context.indent,
-                in_quotes=True
-            )
-            if text:
+            is_equal = prev_file and CMakeWriter.__is_property_of_settings_equal(
+                context.file_contexts[prev_file],
+                context.file_contexts[file],
+                compiler_flags_key)
+
+            text = None
+            if not is_equal:
+                file_cl_var = 'FILE_CL_OPTIONS'
+                text = CMakeWriter.write_property_of_settings(
+                    context.file_contexts[file], cmake_file,
+                    begin_text='string(CONCAT {}'.format(file_cl_var),
+                    end_text=')',
+                    property_name=compiler_flags_key,
+                    indent=context.indent,
+                    in_quotes=True
+                )
+            if text or is_equal:
+                prev_file = file
                 cmake_file.write(
                     '{}source_file_compile_options({} ${{{}}})\n'
                     .format(context.indent, file, file_cl_var))
