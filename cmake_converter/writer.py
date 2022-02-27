@@ -313,13 +313,12 @@ class CMakeWriter:
         """
 
         pch_header = context.settings[setting]['PrecompiledHeaderFile']
+        pch_source = context.settings[setting]['PrecompiledSourceFile']
         working_path = os.path.dirname(context.vcxproj_path)
         cmake_file.write(
-            'target_precompile_headers(${{PROJECT_NAME}} PRIVATE\n'
-            '{}"$<$<COMPILE_LANGUAGE:CXX>:${{CMAKE_CURRENT_SOURCE_DIR}}/{}>"\n'
-            ')\n\n'.format(
-                context.indent,
-                normalize_path(context, working_path, pch_header, False)
+            'use_precompiled_header(ALL_FILES "{}" "{}")\n\n'.format(
+                normalize_path(context, working_path, pch_header, False),
+                normalize_path(context, working_path, pch_source, False)
             )
         )
 
