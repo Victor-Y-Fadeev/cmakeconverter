@@ -125,6 +125,7 @@ class CPPFlags(Flags):
             ('IgnoreEmbeddedIDL', self.__set_ignore_embedded_idl),
             ('AssemblyDebug', self.__set_assembly_debug),
             ('LinkAdditionalOptions', self.__set_link_additional_options),
+            ('NoEntryPoint', self.__set_no_entry_point),
             # precompilation midl_flags
             ('MkTypLibCompatible', self.__set_mk_typ_lib_compatible),
             ('ValidateAllParameters', self.__set_validate_all_parameters),
@@ -667,6 +668,20 @@ class CPPFlags(Flags):
                 ready_add_opts.append(opt)
         self.flags[context.current_setting][flag_name][ln_flags] = ready_add_opts
         message(context, 'Link Additional Options : {}'.format(ready_add_opts), '')
+
+    @staticmethod
+    def __set_no_entry_point(context, flag_name, node):
+        """
+        Set NoEntryPoint flag: /NOENTRY
+
+        """
+        del context, flag_name, node
+        flag_values = {
+            'true': {ln_flags: '/NOENTRY'},
+            default_value: {}
+        }
+
+        return flag_values
 
     @staticmethod
     def __set_basic_runtime_checks(context, flag_name, node):
