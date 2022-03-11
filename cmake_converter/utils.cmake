@@ -240,6 +240,11 @@ macro(use_precompiled_header SRC_LIST_VAR HEADER_FILE SOURCE_FILE)
     get_filename_component(PCH_BINARY ${HEADER_FILE} NAME_WE)
 
     set(PCH_BINARY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${PCH_BINARY}.pch")
+    add_custom_command(
+        TARGET ${PROJECT_NAME} PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_SOURCE_DIR}/${HEADER_FILE}
+                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${HEADER_FILE})
 
     if(MSVC)
         set(SRC_LIST ${${SRC_LIST_VAR}})
