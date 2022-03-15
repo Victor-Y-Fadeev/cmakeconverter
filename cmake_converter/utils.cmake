@@ -242,7 +242,7 @@ macro(use_precompiled_header SRC_LIST_VAR HEADER_FILE SOURCE_FILE)
     set(PCH_BINARY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${PCH_BINARY}.pch")
     add_custom_command(
         TARGET ${PROJECT_NAME} PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 ${CMAKE_CURRENT_SOURCE_DIR}/${HEADER_FILE}
                 ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${HEADER_FILE})
 
