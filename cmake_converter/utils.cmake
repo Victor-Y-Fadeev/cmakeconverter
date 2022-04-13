@@ -240,11 +240,15 @@ macro(use_precompiled_header SRC_LIST_VAR HEADER_FILE SOURCE_FILE)
     get_filename_component(PCH_BINARY ${HEADER_FILE} NAME_WE)
 
     set(PCH_BINARY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${PCH_BINARY}.pch")
-    add_custom_command(
-        TARGET ${PROJECT_NAME} PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${CMAKE_CURRENT_SOURCE_DIR}/${HEADER_FILE}
-                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${HEADER_FILE})
+    set(HEADER_COPY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${HEADER_FILE}")
+    add_custom_command(OUTPUT ${HEADER_COPY}
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_SOURCE_DIR}/${HEADER_FILE} ${HEADER_COPY}
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${HEADER_FILE})
+
+    set_source_files_properties(${HEADER_COPY} PROPERTIES GENERATED "TRUE")
+    add_custom_target(${PROJECT_NAME}_PCH DEPENDS ${HEADER_COPY})
+    add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_PCH)
 
     if(MSVC)
         set(SRC_LIST ${${SRC_LIST_VAR}})
@@ -259,7 +263,7 @@ macro(use_precompiled_header SRC_LIST_VAR HEADER_FILE SOURCE_FILE)
             COMPILE_FLAGS "/Yc${PCH_HEADER} /Fp${PCH_BINARY}"
             OBJECT_OUTPUTS "${PCH_BINARY}"
             OBJECT_DEPENDS "")
-    endif(MSVC)
+    endif()
 endmacro()
 
 ################################################################################
