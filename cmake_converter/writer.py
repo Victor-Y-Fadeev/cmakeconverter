@@ -58,12 +58,12 @@ class CMakeWriter:
 
             self.write_comment(cmake_file, 'Target')
             self.write_target_artifact(context, cmake_file)
+            self.write_use_pch_function(context, cmake_file)
             self.write_target_property_sheets(context, cmake_file)
             self.write_target_outputs(context, cmake_file)
             self.write_include_directories(context, cmake_file)
             self.write_defines(context, cmake_file)
             self.write_flags(context, cmake_file)
-            self.write_use_pch_function(context, cmake_file)
             self.write_target_build_events(context, cmake_file)
             if (context.target_references
                     or context.add_lib_deps
