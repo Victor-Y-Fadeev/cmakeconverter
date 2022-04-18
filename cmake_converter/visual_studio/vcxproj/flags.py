@@ -224,13 +224,14 @@ class CPPFlags(Flags):
 
         if node.text:
             pch_header_file = node.text
-            flag_values.update(
-                {
-                    pch_header_file: {
-                        cl_flags: '/Yu{}'.format(pch_header_file)
+            if context.files.file_lists:
+                flag_values.update(
+                    {
+                        pch_header_file: {
+                            cl_flags: '/Yu{}'.format(pch_header_file)
+                        }
                     }
-                }
-            )
+                )
 
         context.settings[context.current_setting]['PrecompiledHeaderFile'] = pch_header_file
         return flag_values
