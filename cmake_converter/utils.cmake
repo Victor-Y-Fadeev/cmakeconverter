@@ -235,7 +235,13 @@ endfunction()
 #     header_file  - Precompiled header file
 #     source_file  - Source file to precompile
 ################################################################################
-macro(use_precompiled_header SRC_LIST_VAR HEADER_FILE SOURCE_FILE)
+function(use_precompiled_header SRC_LIST_VAR HEADER_FILE SOURCE_FILE)
+    if(NOT MSVC)
+        target_precompile_headers(${PROJECT_NAME} PRIVATE
+            "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/${HEADER_FILE}>")
+        return()
+    endif()
+
     get_filename_component(PCH_HEADER ${HEADER_FILE} NAME)
     get_filename_component(PCH_BINARY ${HEADER_FILE} NAME_WE)
 
@@ -250,21 +256,19 @@ macro(use_precompiled_header SRC_LIST_VAR HEADER_FILE SOURCE_FILE)
     add_custom_target(${PROJECT_NAME}_PCH DEPENDS ${HEADER_COPY})
     add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_PCH)
 
-    if(MSVC)
-        set(SRC_LIST ${${SRC_LIST_VAR}})
-        list(FILTER SRC_LIST INCLUDE REGEX ".*\.cpp")
-        list(FILTER SRC_LIST EXCLUDE REGEX "${SOURCE_FILE}")
+    set(SRC_LIST ${${SRC_LIST_VAR}})
+    list(FILTER SRC_LIST INCLUDE REGEX ".*\.cpp")
+    list(FILTER SRC_LIST EXCLUDE REGEX "${SOURCE_FILE}")
 
-        set_source_files_properties(${SRC_LIST} PROPERTIES
-            COMPILE_FLAGS "/Yu${PCH_HEADER} /Fp\"${PCH_BINARY}\""
-            OBJECT_DEPENDS "${PCH_BINARY}")
+    set_source_files_properties(${SRC_LIST} PROPERTIES
+        COMPILE_FLAGS "/Yu${PCH_HEADER} /Fp\"${PCH_BINARY}\""
+        OBJECT_DEPENDS "${PCH_BINARY}")
 
-        set_source_files_properties(${SOURCE_FILE} PROPERTIES
-            COMPILE_FLAGS "/Yc${PCH_HEADER} /Fp\"${PCH_BINARY}\""
-            OBJECT_OUTPUTS "${PCH_BINARY}"
-            OBJECT_DEPENDS "")
-    endif()
-endmacro()
+    set_source_files_properties(${SOURCE_FILE} PROPERTIES
+        COMPILE_FLAGS "/Yc${PCH_HEADER} /Fp\"${PCH_BINARY}\""
+        OBJECT_OUTPUTS "${PCH_BINARY}"
+        OBJECT_DEPENDS "")
+endfunction()
 
 ################################################################################
 # Default properties of visual studio projects
